@@ -13,8 +13,8 @@ struct User {
     char name[20];
     struct Date dateOfBirth;
     bool gender;
-    char phone[10];
-    char email[20];
+    char phone[20];
+    char email[40];
     char status[10];
 };
 struct User users[MAX_USERS];
