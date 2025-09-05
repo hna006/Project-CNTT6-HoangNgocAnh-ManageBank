@@ -10,7 +10,7 @@ struct Date {
 };
 struct User {
     char userId[10];
-    char name[20];
+    char name[40];
     struct Date dateOfBirth;
     bool gender;
     char phone[20];
@@ -19,35 +19,89 @@ struct User {
 };
 struct User users[MAX_USERS];
 int userCount = 0;
+bool isEmpty(char str[]) {
+    return strlen(str) == 0;
+}
+bool isDuplicate(struct User newUser) {
+    for (int i = 0; i < userCount; i++) {
+        if (strcmp(users[i].userId, newUser.userId) == 0 ||
+            strcmp(users[i].name, newUser.name) == 0 ||
+            strcmp(users[i].phone, newUser.phone) == 0 ||
+            strcmp(users[i].email, newUser.email) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 void addUser() {
     if (userCount >= MAX_USERS) {
         printf("Danh sach da day!\n");
         return;
     }
     struct User user;
-    getchar();
-    printf("Nhap ma nguoi dung: ");
-    fgets(user.userId, sizeof(user.userId), stdin);
-    user.userId[strcspn(user.userId, "\n")] = '\0';
-    printf("Nhap ten nguoi dung: ");
-    fgets(user.name, sizeof(user.name), stdin);
-    user.name[strcspn(user.name, "\n")] = '\0';
-    printf("Nhap ngay sinh (dd mm yyyy): ");
-    scanf("%d %d %d", &user.dateOfBirth.day, &user.dateOfBirth.month, &user.dateOfBirth.year);
-    int genderInput;
-    printf("Nhap gioi tinh (1 = Nam, 0 = Nu): ");
-    scanf("%d", &genderInput);
-    user.gender = (genderInput == 1);
-    getchar();
-    printf("Nhap so dien thoai: ");
-    fgets(user.phone, sizeof(user.phone), stdin);
-    user.phone[strcspn(user.phone, "\n")] = '\0';
-    printf("Nhap email: ");
-    fgets(user.email, sizeof(user.email), stdin);
-    user.email[strcspn(user.email, "\n")] = '\0';
-    strcpy(user.status, "Open");
-    users[userCount++] = user;
-    printf("Da them nguoi dung thanh cong!\n");
+    while (true) {
+        getchar();
+        printf("Nhap ma nguoi dung (toi da 9 ky tu): ");
+        fgets(user.userId, sizeof(user.userId), stdin);
+        user.userId[strcspn(user.userId, "\n")] = '\0';
+        if (strlen(user.userId) == 0 || strlen(user.userId) > 9) {
+            printf("ID khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        getchar();
+        printf("Nhap ten nguoi dung (toi da 19 ky tu): ");
+        fgets(user.name, sizeof(user.name), stdin);
+        user.name[strcspn(user.name, "\n")] = '\0';
+        if (strlen(user.name) == 0 || strlen(user.name) > 19) {
+            printf("Ten khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        printf("Nhap ngay sinh (dd mm yyyy): ");
+        if (scanf("%d %d %d", &user.dateOfBirth.day, &user.dateOfBirth.month, &user.dateOfBirth.year) != 3) {
+            printf("Ngay sinh khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        int genderInput;
+        printf("Nhap gioi tinh (1 = Nam, 0 = Nu): ");
+        if (scanf("%d", &genderInput) != 1 || (genderInput != 0 && genderInput != 1)) {
+            printf("Gioi tinh khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        user.gender = (genderInput == 1);
+        getchar();
+        printf("Nhap so dien thoai (toi da 19 ky tu): ");
+        fgets(user.phone, sizeof(user.phone), stdin);
+        user.phone[strcspn(user.phone, "\n")] = '\0';
+        if (strlen(user.phone) == 0 || strlen(user.phone) > 19) {
+            printf("So dien thoai khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        printf("Nhap email (toi da 39 ky tu): ");
+        fgets(user.email, sizeof(user.email), stdin);
+        user.email[strcspn(user.email, "\n")] = '\0';
+        if (strlen(user.email) == 0 || strlen(user.email) > 39) {
+            printf("Email khong hop le. Vui long nhap lai.\n");
+            continue;
+        }
+        bool trung = false;
+        for (int i = 0; i < userCount; i++) {
+            if (strcmp(users[i].userId, user.userId) == 0 ||
+                strcmp(users[i].name, user.name) == 0 ||
+                strcmp(users[i].phone, user.phone) == 0 ||
+                strcmp(users[i].email, user.email) == 0) {
+                trung = true;
+                break;
+            }
+        }
+        if (trung) {
+            printf("Thong tin da ton tai. Vui long nhap lai.\n");
+            continue;
+        }
+        strcpy(user.status, "Open");
+        users[userCount++] = user;
+        printf("Them nguoi dung thanh cong!\n");
+        break;
+    }
 }
 void showAllUsers() {
     if (userCount == 0) {
@@ -58,12 +112,37 @@ void showAllUsers() {
     printf("| ID         | Name               | Email              | Phone      | Status |\n");
     printf("+------------+--------------------+--------------------+------------+--------+\n");
     for (int i = 0; i < userCount; i++) {
-        printf("| %-10s | %-18s | %-18s | %-10s | %-6s |\n",
-               users[i].userId,
-               users[i].name,
-               users[i].email,
-               users[i].phone,
-               users[i].status);
+        printf("| %-10s | %-18s | %-18s | %-10s | %-6s |\n",users[i].userId,users[i].name,users[i].email,users[i].phone,users[i].status);
+    }
+    printf("+------------+--------------------+--------------------+------------+--------+\n");
+}
+void searchUser() {
+    if (userCount == 0) {
+        printf("Chua co nguoi dung nao!\n");
+        return;
+    }
+    char searchName[20];
+    getchar();
+    printf("Nhap ten nguoi dung can tim: ");
+    fgets(searchName, sizeof(searchName), stdin);
+    searchName[strcspn(searchName, "\n")] = '\0';
+    bool timThay = false;
+    printf("+------------+--------------------+--------------------+------------+--------+\n");
+    printf("| ID         | Name               | Email              | Phone      | Status |\n");
+    printf("+------------+--------------------+--------------------+------------+--------+\n");
+    for (int i = 0; i < userCount; i++) {
+        if (strstr(users[i].name, searchName) != NULL) {
+            printf("| %-10s | %-18s | %-18s | %-10s | %-6s |\n",
+                   users[i].userId,
+                   users[i].name,
+                   users[i].email,
+                   users[i].phone,
+                   users[i].status);
+            timThay = true;
+        }
+    }
+    if (!timThay) {
+        printf("| Khong tim thay nguoi dung co ten \"%s\" |\n", searchName);
     }
     printf("+------------+--------------------+--------------------+------------+--------+\n");
 }
@@ -102,7 +181,7 @@ int main() {
                         showAllUsers();
                         break;
                     case 3:
-                        printf("Chuc nang chua ho tro.\n");
+                        searchUser();
                         break;
                     case 4:
                         printf("Chuc nang chua ho tro.\n");
@@ -135,6 +214,5 @@ int main() {
                 printf("Lua chon khong hop le.\n");
         }
     }
-
     return 0;
 }
